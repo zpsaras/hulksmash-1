@@ -12,8 +12,10 @@ int main()
 	size_t ln;
 	size_t n;
 	int args;
+	int i;
 	char input[INPUT_SIZE];
 	char * tokens[ARG_SIZE];
+	char * tok;
 
 	printf("%s ", NAME);
 	while(fgets(input, INPUT_SIZE, stdin)){
@@ -25,15 +27,15 @@ int main()
 		}
 		
 		n = 0;
-		for(char * p = strtok(input, " "); p; p = strtok(NULL, " ")){
+		for(tok = strtok(input, " "); tok; tok = strtok(NULL, " ")){
 			if(n > ARG_SIZE){
 				break;
 			}
-			tokens[n++] = p;
+			tokens[n++] = tok;
 		}
 		args = n;
 		// print all args -- for testing
-		for(int i = 0 ; i < args ; ++i){
+		for(i = 0 ; i < args ; ++i){
 			printf("token %d is '%s'.\n", i, tokens[i]);
 		}
 	
