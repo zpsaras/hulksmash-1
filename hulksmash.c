@@ -28,7 +28,7 @@ int main()
 		
 		n = 0;
 		// breaks up input into tokens
-		for(tok = strtok(input, " "); tok; tok = strtok(NULL, " ")){
+		for(tok = strtok(input, " \t"); tok; tok = strtok(NULL, " \t")){
 			if(n > ARG_SIZE){
 				break;
 			}
