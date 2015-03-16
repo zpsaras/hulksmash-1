@@ -29,6 +29,7 @@ int main()
 	char * tok;
 
 	char c;
+	char last_quote;
 	char tok_buff[INPUT_SIZE];
 
 	enum states {OUT, IN} state = OUT;
@@ -60,6 +61,7 @@ int main()
 						k = 0;
 					}
 					if((c == '\"') || (c == '\'')){
+						last_quote = c;
 						state = IN;
 					}else if(c == '|'){
 						tok_buff[k++] = '|';	
@@ -83,22 +85,30 @@ int main()
 				}
 			}else if(state == IN){
 				if((c == '\"') || (c == '\'')){
-					if(k > 0){
-						tok_buff[k] = '\0';
-						tok = malloc(k);
-						memcpy(tok, tok_buff, k+1);
-						tokens[n++] = tok;
-						memset(tok_buff, '\0', k);
-						k = 0;
+					if(c == last_quote){
+						if(k > 0){
+							tok_buff[k] = '\0';
+							tok = malloc(k);
+							memcpy(tok, tok_buff, k+1);
+							tokens[n++] = tok;
+							memset(tok_buff, '\0', k);
+							k = 0;
+						}
+						state = OUT;
+					}else{
+						tok_buff[k++] = c;
+						if(i == ln - 1){
+							printf("ERROR! Must have closing quotes.\n");
+							return -1;
+						}
 					}
-					state = OUT;
 				}else if(c == '|'){
 					printf("ERROR! Can't have '|' symbol in quotations.\n");
 					return -1;
 				}else{
 					tok_buff[k++] = c;
 					if(i == ln - 1){
-						printf("ERROR! Must have closing quoatations.\n");
+						printf("ERROR! Must have closing quotations.\n");
 						return -1;
 					}
 				}
