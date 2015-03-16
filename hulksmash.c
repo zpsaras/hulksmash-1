@@ -1,21 +1,37 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
-#define INPUT_SIZE 1024
-#define ARG_SIZE 1000
+#define INPUT_SIZE 2048
+#define ARG_SIZE 50
 #define NAME "-hulksmash-4.20$ "
 #define QUIT "-q"
+#define DELIMS " \t|\"\0"
+
+bool is_delim(char c){
+	if(strchr(DELIMS, c) != NULL){
+		return true;
+	}
+	return false;
+}
 
 int main()
 {
 	size_t ln;
 	size_t n;
+	
 	int args;
-	int i;
+	int i, k;
+	
 	char input[INPUT_SIZE];
 	char * tokens[ARG_SIZE];
 	char * tok;
+
+	char c;
+	char tok_buff[INPUT_SIZE];
+
+	enum states {OUT, IN} state = OUT;
 
 	printf("%s ", NAME);
 	while(fgets(input, INPUT_SIZE, stdin)){
@@ -26,13 +42,67 @@ int main()
 			break;
 		}
 		
-		n = 0;
 		// breaks up input into tokens
-		for(tok = strtok(input, " \t"); tok; tok = strtok(NULL, " \t")){
-			if(n > ARG_SIZE){
-				break;
+		k = 0;
+		n = 0;
+		memset(tok_buff, '\0', INPUT_SIZE);
+		for(i = 0 ; i < ln ; ++i){
+			c = input[i];
+			if(state == OUT){
+				if((c == ' ') || (c == '\t') || (c == '\"') || 
+				   (c == '\'') || (c == '|')){
+					if(k > 0){
+						tok_buff[k] = '\0';
+						tok = malloc(k);
+						memcpy(tok, tok_buff, k+1);
+						tokens[n++] = tok;
+						memset(tok_buff, '\0', k);
+						k = 0;
+					}
+					if((c == '\"') || (c == '\'')){
+						state = IN;
+					}else if(c == '|'){
+						tok_buff[k++] = '|';	
+						tok_buff[k] = '\0';
+						tok = malloc(k);
+						memcpy(tok, tok_buff, k+1);
+						tokens[n++] = tok;
+						memset(tok_buff, '\0', k);
+						k = 0;
+					}
+				}else{
+					tok_buff[k++] = c;
+					if(i == ln - 1){
+						tok_buff[k] = '\0';
+						tok = malloc(k);
+						memcpy(tok, tok_buff, k+1);
+						tokens[n++] = tok;
+						memset(tok_buff, '\0', k);
+						k = 0;
+					}
+				}
+			}else if(state == IN){
+				if((c == '\"') || (c == '\'')){
+					if(k > 0){
+						tok_buff[k] = '\0';
+						tok = malloc(k);
+						memcpy(tok, tok_buff, k+1);
+						tokens[n++] = tok;
+						memset(tok_buff, '\0', k);
+						k = 0;
+					}
+					state = OUT;
+				}else if(c == '|'){
+					printf("ERROR! Can't have '|' symbol in quotations.\n");
+					return -1;
+				}else{
+					tok_buff[k++] = c;
+					if(i == ln - 1){
+						printf("ERROR! Must have closing quoatations.\n");
+						return -1;
+					}
+				}
 			}
-			tokens[n++] = tok;
 		}
 		args = n;
 		// print all args -- for testing
