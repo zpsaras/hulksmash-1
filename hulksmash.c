@@ -96,9 +96,6 @@ int main()
 							return -1;
 						}
 					}
-				}else if(c == '|'){
-					printf("ERROR! Can't have '|' symbol in quotations.\n");
-					return -1;
 				}else{
 					tok_buff[k++] = c;
 					if(i == ln - 1){
