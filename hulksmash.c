@@ -9,12 +9,7 @@
 #define QUIT "-q"
 #define DELIMS " \t|\"\0"
 
-bool is_delim(char c){
-	if(strchr(DELIMS, c) != NULL){
-		return true;
-	}
-	return false;
-}
+char * tokens[ARG_SIZE];
 
 int main()
 {
@@ -25,7 +20,7 @@ int main()
 	int i, k;
 	
 	char input[INPUT_SIZE];
-	char * tokens[ARG_SIZE];
+	//char * tokens[ARG_SIZE];
 	char * tok;
 
 	char c;
@@ -43,9 +38,8 @@ int main()
 			break;
 		}
 		
-		// breaks up input into tokens
-		k = 0;
-		n = 0;
+		// tokenizer. ugly af gonna try to make gooder
+		k = n = 0;
 		memset(tok_buff, '\0', INPUT_SIZE);
 		for(i = 0 ; i < ln ; ++i){
 			c = input[i];
