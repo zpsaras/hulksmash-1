@@ -5,6 +5,7 @@
 #include <errno.h>
 
 #define MAX_BUFFER 4096
+#define COMMAND_ARRAY_SIZE 1024 
 
 struct _COMMAND {
     char alias[128];
@@ -14,15 +15,15 @@ struct _COMMAND {
 /* This function to read PATH variable from local file
  * if the file does not exist, fail
  */
-int init_commands(COMMAND ** cmdArray,char ** path){
+int init_commands(COMMAND ** cmdArray){
     FILE * fd = fopen("PATH","r");
     char buffer[MAX_BUFFER];
     char * cptr;
     char alias[128];
     char cmdPath[1024];
-    bool tAlias_fPath;
+    bool tAlias_fPath=true;
     COMMAND * cmd;
-    if(fd < 0){
+    if(fd == NULL){
         fprintf(stderr,"Failed to open PATH. (Perhaps it hasn't been created)\n");
         return -1;
     }
@@ -32,6 +33,7 @@ int init_commands(COMMAND ** cmdArray,char ** path){
         if(tAlias_fPath){
             strncpy(alias, cptr, 128);
             tAlias_fPath = false;
+            cptr = strtok(NULL,",|");
         } else {
             strncpy(cmdPath, cptr, 1024);
             cmd = malloc(sizeof(COMMAND));
@@ -41,6 +43,7 @@ int init_commands(COMMAND ** cmdArray,char ** path){
             strncpy(cmd->path,cmdPath,1024);
             register_command(cmdArray,cmd);
             tAlias_fPath = true;  
+            cptr = strtok(NULL,",|");
         }
     }
 }
@@ -51,10 +54,9 @@ int write_PATH(char ** fpath){
 
 int register_command(COMMAND ** cmdArray, COMMAND * cmd){
    int i = 0;
-   int arraySize = sizeof(cmdArray)/sizeof(cmdArray[0]);
    bool flag=false;
    //Find end of COMMAND array
-   for( i=0 ; i<arraySize-1 ; i++){
+   for( i=0 ; i<COMMAND_ARRAY_SIZE ; i++){
        if(cmdArray[i]==NULL){
            //Found empty spot
            flag=true;
@@ -68,4 +70,13 @@ int register_command(COMMAND ** cmdArray, COMMAND * cmd){
        fprintf(stderr, "Failed to add command! (COMMAND upper-limit probably reached?)\n");
        return -1;
    }
+}
+
+void print_command_list(COMMAND ** cmdArray){
+  int i;
+  for( i=0 ; i<COMMAND_ARRAY_SIZE ; i++){
+    if(cmdArray[i]!=NULL){
+      fprintf(stdout,"%s\t%s\n",cmdArray[i]->alias,cmdArray[i]->path);
+    }
+  }
 }
