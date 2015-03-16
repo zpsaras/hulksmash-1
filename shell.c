@@ -1,7 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
+#include "shell.h"
 
 #define INPUT_SIZE 2048
 #define ARG_SIZE 50
