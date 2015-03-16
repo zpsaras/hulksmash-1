@@ -1,8 +1,8 @@
 all:
-	gcc -o hulksmash hulksmash.c
+	gcc -o shell shell.c
 
 run:
-	./hulksmash
+	./shell
 
 clean:
-	rm -rf *.o hulksmash
+	rm -rf *.o shell
