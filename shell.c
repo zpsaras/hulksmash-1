@@ -118,7 +118,9 @@ int main()
 		if(strcmp(tokens[0],"cd") != 0){
 			execute(tokens);
 		} else {
-			chdir(tokens[1]);
+			if(chdir(tokens[1]) != 0){
+				fprintf(stderr,"cd: %s: No such directory\n",tokens[1]);
+			}
 		}
 
 
