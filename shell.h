@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <errno.h>
+#include <unistd.h>
 
 #define MAX_BUFFER 4096
 #define COMMAND_ARRAY_SIZE 1024 
@@ -11,6 +12,12 @@ struct _COMMAND {
     char alias[128];
     char path[1024];
 }; typedef struct _COMMAND COMMAND;
+
+void print_prompt(char * name){
+	char buffer[MAX_BUFFER];
+	getcwd(buffer,MAX_BUFFER);
+	fprintf(stdout,"%s:%s$ ",name,buffer);
+}
 
 /* This function to read PATH variable from local file
  * if the file does not exist, fail
@@ -78,5 +85,19 @@ void print_command_list(COMMAND ** cmdArray){
     if(cmdArray[i]!=NULL){
       fprintf(stdout,"%s\t%s\n",cmdArray[i]->alias,cmdArray[i]->path);
     }
+  }
+}
+
+void execute(char ** argv){
+  int status;
+  pid_t pid;
+  if((pid = fork()) == 0){
+    if(execvp(*argv,argv) < 0){
+      fprintf(stderr,"%s: Could not exec! Perhaps file does not exist.\n",*argv);
+      exit(1); //Error
+    }
+  } else {
+    //Make sure child finishes before parent
+    while (wait(&status) != pid);
   }
 }

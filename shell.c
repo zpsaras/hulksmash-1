@@ -2,7 +2,7 @@
 
 #define INPUT_SIZE 2048
 #define ARG_SIZE 50
-#define NAME "-hulksmash-4.20$ "
+#define NAME "-hulksmash-4.20$"
 #define QUIT "-q"
 #define DELIMS " \t|\"\0"
 
@@ -26,7 +26,8 @@ int main()
 
 	enum states {OUT, IN} state = OUT;
 
-	printf("%s ", NAME);
+	//printf("%s ", NAME);
+	print_prompt(NAME);
 	while(fgets(input, INPUT_SIZE, stdin)){
 		ln = strlen(input) - 1;
 		if(input[ln] == '\n'){input[ln] = '\0';}
@@ -104,11 +105,25 @@ int main()
 		}
 		args = n;
 		// print all args -- for testing
+		/*
 		for(i = 0 ; i < args ; ++i){
 			printf("token %d is '%s'.\n", i, tokens[i]);
 		}
-	
-		printf("%s ", NAME);
+		*/
+		
+		/*
+		 * !!!TEST SECTION!!!
+		 */
+		tokens[args] = NULL;
+		if(strcmp(tokens[0],"cd") != 0){
+			execute(tokens);
+		} else {
+			chdir(tokens[1]);
+		}
+
+
+		//printf("%s ", NAME);
+		print_prompt(NAME);
 	}
 	
 	return 0;
