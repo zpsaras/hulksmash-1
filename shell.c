@@ -92,8 +92,9 @@ int main()
 			break;
 		}
 		
-		// tokenizer. ugly af gonna try to make gooder
-		args = tokenize(input, ln);
+		if((args = tokenize(input, ln)) == -1){
+			break;
+		}
 		
 		// print all args -- for testing
 		for(i = 0 ; i < args ; ++i){
