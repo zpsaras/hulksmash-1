@@ -96,22 +96,27 @@ int main()
 			break;
 		}
 		
+		/*
 		// print all args -- for testing
 		for(i = 0 ; i < args ; ++i){
 			printf("token %d is '%s'.\n", i, tokens[i]);
 		}
+		*/
 		
 		
 		/*
 		 * !!!TEST SECTION!!!
 		 */
 		tokens[args] = NULL;
-		if(strcmp(tokens[0],"cd") != 0){
-			execute(tokens);
-		} else {
-			if(chdir(tokens[1]) != 0){
+		
+		if(strcmp(tokens[0],"cd") == 0){
+			if(((_CHDIR)funcs[0])(tokens[1]) != 0){
 				fprintf(stderr,"cd: %s: No such directory\n",tokens[1]);
 			}
+		} else if(strcmp(tokens[0],"exit") == 0) {
+			((_EXIT)funcs[1])(0);
+		} else {
+			execute(tokens);
 		}
 
 

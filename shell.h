@@ -8,6 +8,12 @@
 #define MAX_BUFFER 4096
 #define COMMAND_ARRAY_SIZE 1024 
 
+typedef int (*_CHDIR)(char *);
+typedef void (*_EXIT)(int);
+typedef void (*fp)(void);
+
+fp funcs[2] = { (fp)chdir, (fp)exit };
+
 struct _COMMAND {
     char alias[128];
     char path[1024];
@@ -101,5 +107,6 @@ void execute(char ** argv){
   } else {
     //Make sure child finishes before parent
     while (wait(&status) != pid);
+		printf("Process exited with status: %d\n",status);
   }
 }
