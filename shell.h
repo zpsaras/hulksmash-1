@@ -98,15 +98,20 @@ void execute(char ** argv){
   int status;
   pid_t pid;
   if((pid = fork()) == 0){
-    if(execvp(*argv,argv) < 0){
+		if(argv[0][0] == '.' && argv[0][1] == '/'){
 			if(execv(*argv,argv) < 0 ){
-      	fprintf(stderr,"%s: Could not exec! Perhaps file does not exist.\n",*argv);
+				fprintf(stderr,"%s: Could not exec! Perhaps file does not exist.\n",*argv);
+				exit(1);
 			}
-    	exit(1); //Error
-    }
+		} else {
+    	if(execvp(*argv,argv) < 0){
+      	fprintf(stderr,"%s: Could not exec! Perhaps file does not exist.\n",*argv);
+    		exit(1); //Error
+    	}
+		}
   } else {
     //Make sure child finishes before parent
     while (wait(&status) != pid);
-		printf("Process exited with status: %d\n",status);
+		printf("Process %u exited with status: %d\n",pid,status);
   }
 }

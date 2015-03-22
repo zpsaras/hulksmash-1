@@ -104,13 +104,12 @@ int main()
 		*/
 		
 		
-		/*
-		 * !!!TEST SECTION!!!
-		 */
 		tokens[args] = NULL;
-		
-		if(strcmp(tokens[0],"cd") == 0){
-			if(((_CHDIR)funcs[0])(tokens[1]) != 0){
+		//Sorry for the lack of inspiration PK ;]
+		if(tokens[0] == NULL){
+			//Do nothing
+		} else if(strcmp(tokens[0],"cd") == 0){
+			if(((_CHDIR)funcs[0])(tokens[1]) != 0) {
 				fprintf(stderr,"cd: %s: No such directory\n",tokens[1]);
 			}
 		} else if(strcmp(tokens[0],"exit") == 0) {
