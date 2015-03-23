@@ -123,6 +123,9 @@ int main()
 		if(tokens[0] == NULL){
 			//Do nothing
 		} else if(strcmp(tokens[0],"cd") == 0){
+			if(tokens[2] != NULL){
+				fprintf(stderr,"cd: too many arguments\n");
+			}
 			if(((_CHDIR)funcs[0])(tokens[1]) != 0) {
 				fprintf(stderr,"cd: %s: No such directory\n",tokens[1]);
 			}

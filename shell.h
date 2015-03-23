@@ -281,7 +281,16 @@ void execute_parsed2(COMMAND ** commands){
 				dup2(p[1],1);
 			}
 			close(p[0]);
-			execvp(commands[i]->argv[0],commands[i]->argv);
+			if(commands[i]->argv[0][0] == '.' && commands[i]->argv[0][1] == '/'){
+				//Local exec
+				if(execv(commands[i]->argv[0],commands[i]->argv)!=0){
+					fprintf(stderr,"%s: Failed to exec.\n",commands[i]->argv[0]);
+				}
+			} else {
+				if(execvp(commands[i]->argv[0],commands[i]->argv)!=0){
+					fprintf(stderr,"%s: Failed to exec.\n",commands[i]->argv[0]);
+				}
+			}
 			exit(EXIT_FAILURE);
 		} else {
 			wait(NULL);
