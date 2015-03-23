@@ -12,7 +12,6 @@ char tok_buff[INPUT_SIZE];
 enum states {OUT, IN} state = OUT;
 int i, k, n;
 char * tok;
-char input[INPUT_SIZE];
 
 void add_tok(){
 	tok_buff[k] = '\0';
@@ -24,10 +23,11 @@ void add_tok(){
 
 }
 
-void mismatched(char quote, int z){
+void mismatched(char * string, char quote, int z){
 	printf(QUOTE_ERROR);
-	input[z] = quote;
-	printf("reading input as: %s\n", input);
+	//input[z] = quote;
+	string[z] = quote;
+	printf("reading input as: %s\n", string);
 	add_tok();
 }
 
@@ -50,7 +50,7 @@ int tokenize(char * string, int ln){
 					last_quote = c;
 					state = IN;
 					if(i == ln -1){
-						mismatched(last_quote, ln);
+						mismatched(string, last_quote, ln);
 					}
 				}else if(c == '|'){
 					tok_buff[k++] = '|';
@@ -72,13 +72,13 @@ int tokenize(char * string, int ln){
 				}else{
 					tok_buff[k++] = c;
 					if(i == ln - 1){
-						mismatched(last_quote, ln);
+						mismatched(string, last_quote, ln);
 					}
 				}
 			}else{
 				tok_buff[k++] = c;
 				if(i == ln - 1){
-					mismatched(last_quote, ln);
+					mismatched(string, last_quote, ln);
 				}
 			}
 		}
@@ -90,6 +90,7 @@ int tokenize(char * string, int ln){
 int main()
 {
 	int args, i, ln, j,k;	
+	char input[INPUT_SIZE];
 	
 	if(!isatty(fileno(stdin))){
 		printf("WOAH SHUT IT DOWN\n");
