@@ -16,10 +16,21 @@ fp funcs[2] = { (fp)chdir, (fp)exit };
 
 char ** parsed_commands[50]; //Hard-coded because screw posterity.
 
+
+/* OLD COMMAND DEF
 struct _COMMAND {
     char alias[128];
     char path[1024];
+		int fd[2];
 }; typedef struct _COMMAND COMMAND;
+*/
+
+struct _COMMAND {
+	char * argv[50];
+	int fd[2];
+}; typedef struct _COMMAND COMMAND;
+
+COMMAND * parsed_commands2[1024];
 
 void print_prompt(char * name){
 	char buffer[MAX_BUFFER];
@@ -27,9 +38,9 @@ void print_prompt(char * name){
 	fprintf(stdout,"%s:%s$ ",name,buffer);
 }
 
-/* This function to read PATH variable from local file
+/* DEPRECATED
+ * This function to read PATH variable from local file
  * if the file does not exist, fail
- */
 int init_commands(COMMAND ** cmdArray){
     FILE * fd = fopen("PATH","r");
     char buffer[MAX_BUFFER];
@@ -95,6 +106,7 @@ void print_command_list(COMMAND ** cmdArray){
     }
   }
 }
+*/
 
 void execute(char ** argv, int pfd[],int parsed_index){
   int status;
@@ -159,7 +171,7 @@ void execute_parsed(char *** argv){
 	}
 	close(pfd[0]);close(pfd[1]);
 	while ((pid = wait(&status)) != -1);
-	printf("A process exited with status: %d\n",pid,status);
+	printf("A process exited with status: %d\n",status);
 
 }
 
@@ -188,4 +200,93 @@ void parse_tokens(char ** tokens, int args){
 		}
 	}
 	parsed_commands[j+1] = NULL;
+}
+
+void parse_tokens2(char ** tokens, int args){
+	int i;
+	int j=0;
+	int k=0;
+	bool FIRST = true;
+	parsed_commands2[j] = malloc(sizeof(COMMAND));
+	for( i = 0 ; i < args ; i++){
+		if ( strcmp(tokens[i],"|") == 0 ){
+			//fprintf(stdout,"FOUND PIPE\n");
+			parsed_commands2[j]->argv[k] = NULL;
+			k=0;
+			j++;
+			parsed_commands2[j] = malloc(sizeof(COMMAND));
+			continue;
+		} else {
+			//fprintf(stdout,"Adding token: %s\n",tokens[i]);
+			parsed_commands2[j]->argv[k] = malloc(sizeof(char*));
+			parsed_commands2[j]->argv[k] = tokens[i];
+			k++;
+		}
+	}
+	parsed_commands2[j+1] = NULL;
+	//fprintf(stdout,"PARSED COMMANDS\n");
+}
+
+void prepare_pipes(COMMAND ** commands){
+	int i;
+
+	fprintf(stdout,"PREPPING PIPES\n");
+	for( i = 0 ; commands[i] != NULL ; i++ ){
+		pipe(commands[i]->fd);
+		if( i == 0 && commands[i+1] == NULL ){ //Only command
+			//No need to set up pipes
+			fprintf(stdout,"NO SETUP\n");
+		} else if( i == 0 ){ /* Always source */
+			fprintf(stdout,"SETTING FIRST\n");
+			dup2(commands[i]->fd[1], 1);
+			close(commands[i]->fd[0]);
+			fprintf(stdout,"SET FIRST\n");
+		} else if( commands[i+1] == NULL ){ /* Always destination/output to stdout */
+			//Takes output from last command as input
+			fprintf(stdout,"SETTING LAST\n");
+			dup2(commands[i]->fd[0],commands[i-1]->fd[1]);
+			close(commands[i]->fd[1]);
+			fprintf(stdout,"SET LAST\n");
+		} else { //Anywhere in-between is always src&dest
+			fprintf(stdout,"SETTING INTERMEDIATE\n");
+			dup2(commands[i]->fd[0],commands[i-1]->fd[1]);
+			dup2(commands[i]->fd[1],1);
+			fprintf(stdout,"INTERMEDIATE SET\n");
+		}
+	}
+	fprintf(stdout,"PIPES PREPPED\n");
+}
+
+void close_pipes(COMMAND ** commands){
+	int i;
+	for( i = 0 ; commands[i] != NULL ; i++ ){
+		close(commands[i]->fd[0]);
+		close(commands[i]->fd[1]);
+	}
+}
+
+
+void execute_parsed2(COMMAND ** commands){
+	int i,status,pid;
+	int p[2];
+	int fd_in = 0;
+
+	for( i = 0 ; commands[i] != NULL ; i++){
+		pipe(p);
+		if((pid = fork()) == -1){
+				exit(EXIT_FAILURE);
+		} else if (pid == 0){
+			dup2(fd_in, 0);
+			if(commands[i+1] != NULL){
+				dup2(p[1],1);
+			}
+			close(p[0]);
+			execvp(commands[i]->argv[0],commands[i]->argv);
+			exit(EXIT_FAILURE);
+		} else {
+			wait(NULL);
+			close(p[1]);
+			fd_in = p[0];
+		}
+	}
 }

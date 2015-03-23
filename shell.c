@@ -107,7 +107,7 @@ int main()
 		}
 		*/
 		
-		parse_tokens(tokens,args);
+		parse_tokens2(tokens,args);
 		/*
 		fprintf(stderr,"%s\n",parsed_commands[0][2]);
 		for( j = 0 ; parsed_commands[j] != NULL ; j++){
@@ -129,7 +129,7 @@ int main()
 		} else if(strcmp(tokens[0],"exit") == 0) {
 			((_EXIT)funcs[1])(0);
 		} else {
-			execute_parsed(parsed_commands);
+			execute_parsed2(parsed_commands2);
 		}
 
 
