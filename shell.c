@@ -25,7 +25,6 @@ void add_tok(){
 
 void mismatched(char * string, char quote, int z){
 	printf(QUOTE_ERROR);
-	//input[z] = quote;
 	string[z] = quote;
 	printf("reading input as: %s\n", string);
 	add_tok();
@@ -35,7 +34,6 @@ int tokenize(char * string, int ln){
 
 	char c, last_quote;
 
-
 	memset(tok_buff, '\0', INPUT_SIZE);
 	k = n = 0;
 	state = OUT;
@@ -43,8 +41,7 @@ int tokenize(char * string, int ln){
 		c = string[i];
 		if(state == OUT){
 			if((c == ' ') || (c == '\t') || (c == '\"') || 
-			   (c == '\'') || (c == '|') || (c == '\n') ||
-			   (c == ';')){
+			   (c == '\'') || (c == '|') || (c == '\n')){
 				if(k > 0){
 					add_tok();
 				}
@@ -125,11 +122,13 @@ int main()
 	
 		tokens[args] = NULL;
 		
+		/*
 		// print all args -- for testing
 		for(i = 0 ; i < args ; ++i){
 			printf("token %d is '%s'.\n", i, tokens[i]);
 		}
-		
+		*/
+
 		parse_tokens2(tokens,args);
 		/*
 		fprintf(stderr,"%s\n",parsed_commands[0][2]);
