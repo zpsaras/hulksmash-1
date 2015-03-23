@@ -92,7 +92,7 @@ int main()
 	char input[INPUT_SIZE];
 	
 	if(!isatty(fileno(stdin))){
-		printf("WOAH SHUT IT DOWN\n");
+		printf("DEBUG\n");
 		fgets(input, INPUT_SIZE, stdin);
 		ln = strlen(input) -1;
 		args = tokenize(input,ln);
@@ -104,7 +104,6 @@ int main()
 		newexec(parsed_commands2);
 		return 0;
 	}
-	//printf("%s ", NAME);
 	print_prompt(NAME);
 	while(fgets(input, INPUT_SIZE, stdin)){
 		ln = strlen(input) - 1;
@@ -120,26 +119,9 @@ int main()
 			continue;
 		}
 	
-		tokens[args] = NULL;
-		
-		/*
-		// print all args -- for testing
-		for(i = 0 ; i < args ; ++i){
-			printf("token %d is '%s'.\n", i, tokens[i]);
-		}
-		*/
+		tokens[args] = NULL;	
 
 		parse_tokens2(tokens,args);
-		/*
-		fprintf(stderr,"%s\n",parsed_commands[0][2]);
-		for( j = 0 ; parsed_commands[j] != NULL ; j++){
-			fprintf(stderr,"Eh?\n");
-			for( k = 0 ; parsed_commands[j][k] != NULL ; k++){
-				fprintf(stdout,"%s ",parsed_commands[j][k]);
-			}
-			fprintf(stdout,"\n");
-		}
-		*/
 
 		//Sorry for the lack of inspiration PK ;]
 		if(tokens[0] == NULL){
@@ -162,10 +144,7 @@ int main()
 			newexec(parsed_commands2);
 		}
 
-
-		//printf("%s ", NAME);
 		print_prompt(NAME);
 	}
-	
 	return 0;
 }
