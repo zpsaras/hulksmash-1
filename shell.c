@@ -89,7 +89,15 @@ int tokenize(char * string, int ln){
 int main()
 {
 	int args, i, ln, j,k;	
-
+	
+	if(!isatty(fileno(stdin))){
+		printf("WOAH SHUT IT DOWN\n");
+		args = tokenize(fgets(input, INPUT_SIZE, stdin),strlen(input)-1);
+		tokens[args]=NULL;
+		parse_tokens2(tokens,args);
+		newexec(parsed_commands2);
+		return 0;
+	}
 	//printf("%s ", NAME);
 	print_prompt(NAME);
 	while(fgets(input, INPUT_SIZE, stdin)){
