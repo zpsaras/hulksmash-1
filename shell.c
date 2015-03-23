@@ -35,6 +35,8 @@ int tokenize(char * string, int ln){
 
 	char c, last_quote;
 
+	printf("input: %s\n", string);
+
 	memset(tok_buff, '\0', INPUT_SIZE);
 	k = n = 0;
 	state = OUT;
