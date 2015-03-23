@@ -78,7 +78,7 @@ int tokenize(char * string, int ln){
 
 int main()
 {
-	int args, i, ln;
+	int args, i, ln, j,k;
 	
 	char input[INPUT_SIZE];
 
@@ -93,18 +93,28 @@ int main()
 		}
 		
 		if((args = tokenize(input, ln)) == -1){
-			break;
+			print_prompt(NAME);
+			continue;
 		}
+	
+		tokens[args] = NULL;
 		
-		/*
 		// print all args -- for testing
 		for(i = 0 ; i < args ; ++i){
 			printf("token %d is '%s'.\n", i, tokens[i]);
 		}
-		*/
 		
-		
-		tokens[args] = NULL;
+		fprintf(stderr,"#Args: %d\n",args);
+		parse_tokens(tokens,args);
+		fprintf(stderr,"%s\n",parsed_commands[0][2]);
+		for( j = 0 ; parsed_commands[j] != NULL ; j++){
+			fprintf(stderr,"Eh?\n");
+			for( k = 0 ; parsed_commands[j][k] != NULL ; k++){
+				fprintf(stdout,"%s ",parsed_commands[j][k]);
+			}
+			fprintf(stdout,"\n");
+		}
+
 		//Sorry for the lack of inspiration PK ;]
 		if(tokens[0] == NULL){
 			//Do nothing
@@ -115,7 +125,7 @@ int main()
 		} else if(strcmp(tokens[0],"exit") == 0) {
 			((_EXIT)funcs[1])(0);
 		} else {
-			execute(tokens);
+			execute_parsed(parsed_commands);
 		}
 
 

@@ -14,6 +14,8 @@ typedef void (*fp)(void);
 
 fp funcs[2] = { (fp)chdir, (fp)exit };
 
+char ** parsed_commands[50]; //Hard-coded because screw posterity.
+
 struct _COMMAND {
     char alias[128];
     char path[1024];
@@ -94,7 +96,7 @@ void print_command_list(COMMAND ** cmdArray){
   }
 }
 
-void execute(char ** argv){
+void execute(char ** argv, int pfd[],int parsed_index){
   int status;
   pid_t pid;
   if((pid = fork()) == 0){
@@ -114,4 +116,77 @@ void execute(char ** argv){
     while (wait(&status) != pid);
 		printf("Process %u exited with status: %d\n",pid,status);
   }
+}
+
+void execute2(char ** argv, int pfd[],int parsed_index){
+	int status;
+	pid_t pid;
+
+	switch (pid = fork()) {
+		case 0: //CHILD
+			//Check if we have a pipe left
+			if(parsed_commands[parsed_index+1] == NULL){
+				//Last in list will always be Destination
+				dup2(pfd[0],0);
+				close(pfd[1]);
+				execvp(*argv,argv);
+			}
+			if(parsed_index == 0){
+				//First in list will always be Source
+				dup2(pfd[1],1);
+				close(pfd[0]);
+				execvp(*argv,argv);
+			} else {
+				dup2(pfd[0],0);
+				dup2(pfd[1],1);
+				execvp(*argv,argv);
+				//Everything in between is always Source AND Destination
+			}
+		default: //PARENT
+			close(pfd[0]);close(pfd[1]);
+			while (wait(&status) != pid);
+			printf("Process %u exited with status: %d\n",pid,status);
+			break;
+		case -1:
+			fprintf(stderr,"%s: Could not exec!",*argv);
+			break;
+	}
+}
+
+void execute_parsed(char *** argv){
+	int pfd[2];
+	int i;
+	pipe(pfd);
+
+	for( i = 0 ; parsed_commands[i] != NULL ; i++){
+		execute(parsed_commands[i],pfd,i);
+	}
+	close(pfd[0]);close(pfd[1]);
+}
+
+void parse_tokens(char ** tokens, int args){
+	char * string;
+	int i;
+	int j=0;
+	int k=0;
+	bool FIRST = true;
+	//parsed_commands[x][y] -> token
+	//parsed_commands[x] -> array of tokens
+	parsed_commands[j] = malloc(sizeof(char**));
+	for( i = 0 ; i < args ; i++ ){
+		if( strcmp(tokens[i],"|") == 0 ){
+			//fprintf(stdout,"FOUND PIPE\n");
+			parsed_commands[j][k] = NULL;
+			k=0;
+			j++;
+			parsed_commands[j] = malloc(sizeof(char**));
+			continue;
+		} else {
+			//fprintf(stdout,"Token is: %s\n",tokens[i]);
+			parsed_commands[j][k] = malloc(sizeof(char*));
+			parsed_commands[j][k] = tokens[i];
+			k++;
+		}
+	}
+	parsed_commands[j+1] = NULL;
 }
