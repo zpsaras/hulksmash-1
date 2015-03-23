@@ -44,7 +44,7 @@ int tokenize(char * string, int ln){
 		c = string[i];
 		if(state == OUT){
 			if((c == ' ') || (c == '\t') || (c == '\"') || 
-			   (c == '\'') || (c == '|')){
+			   (c == '\'') || (c == '|') || (c == '\n')){
 				if(k > 0){
 					add_tok();
 				}
