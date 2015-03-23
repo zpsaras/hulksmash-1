@@ -96,7 +96,9 @@ int main()
 	
 	if(!isatty(fileno(stdin))){
 		printf("WOAH SHUT IT DOWN\n");
-		args = tokenize(fgets(input, INPUT_SIZE, stdin),strlen(input)-1);
+		fgets(input, INPUT_SIZE, stdin);
+		ln = strlen(input) -1;
+		args = tokenize(input,ln);
 		printf("%d\n",args);
 		printf("%s\n",input);
 		printf("%s\n",tokens[0]);
