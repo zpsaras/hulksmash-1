@@ -14,7 +14,7 @@ char * tok;
 
 void add_tok(){
 	tok_buff[k] = '\0';
-	tok = malloc(k);
+	tok = malloc(k+1);
 	memcpy(tok, tok_buff, k+1);
 	tokens[n++] = tok;
 	memset(tok_buff, '\0', k);
