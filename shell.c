@@ -130,7 +130,12 @@ int main()
 				fprintf(stderr,"cd: %s: No such directory\n",tokens[1]);
 			}
 		} else if(strcmp(tokens[0],"exit") == 0) {
-			((_EXIT)funcs[1])(0);
+			if(tokens[1]!=NULL){
+				((_EXIT)funcs[1])(atoi(tokens[1]));
+			} else {
+				((_EXIT)funcs[1])(0);
+			}
+				
 		} else {
 			newexec(parsed_commands2);
 		}

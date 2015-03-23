@@ -4,7 +4,6 @@
 #include <stdbool.h>
 #include <errno.h>
 #include <unistd.h>
-#include <limits.h>
 
 #define MAX_BUFFER 4096
 #define COMMAND_ARRAY_SIZE 1024 
@@ -109,99 +108,7 @@ void print_command_list(COMMAND ** cmdArray){
 }
 */
 
-void execute(char ** argv, int pfd[],int parsed_index){
-  int status;
-  pid_t pid;
-  if((pid = fork()) == 0){
-		if(argv[0][0] == '.' && argv[0][1] == '/'){
-			if(execv(*argv,argv) < 0 ){
-				fprintf(stderr,"%s: Could not exec! Perhaps file does not exist.\n",*argv);
-				exit(1);
-			}
-		} else {
-    	if(execvp(*argv,argv) < 0){
-      	fprintf(stderr,"%s: Could not exec! Perhaps file does not exist.\n",*argv);
-    		exit(1); //Error
-    	}
-		}
-  } else {
-    //Make sure child finishes before parent
-    while (wait(&status) != pid);
-		printf("Process %u exited with status: %d\n",pid,status);
-  }
-}
 
-void execute2(char ** argv, int pfd[],int parsed_index){
-	int status;
-	pid_t pid;
-
-	switch (pid = fork()) {
-		case 0: //CHILD
-			//Check if we have a pipe left
-			if(parsed_commands[parsed_index+1] == NULL){
-				//Last in list will always be Destination
-				dup2(pfd[0],0);
-				close(pfd[1]);
-				execvp(*argv,argv);
-			} else if(parsed_index == 0){
-				//First in list will always be Source
-				dup2(pfd[1],1);
-				close(pfd[0]);
-				execvp(*argv,argv);
-			} else {
-				dup2(pfd[0],0);
-				dup2(pfd[1],1);
-				execvp(*argv,argv);
-				//Everything in between is always Source AND Destination
-			}
-		default: //PARENT
-			break;
-		case -1:
-			fprintf(stderr,"%s: Could not exec!",*argv);
-			break;
-	}
-}
-
-void execute_parsed(char *** argv){
-	int pfd[2];
-	int i,status,pid;
-	pipe(pfd);
-
-	for( i = 0 ; parsed_commands[i] != NULL ; i++){
-		execute2(parsed_commands[i],pfd,i);
-	}
-	close(pfd[0]);close(pfd[1]);
-	while ((pid = wait(&status)) != -1);
-	printf("A process exited with status: %d\n",status);
-
-}
-
-void parse_tokens(char ** tokens, int args){
-	char * string;
-	int i;
-	int j=0;
-	int k=0;
-	bool FIRST = true;
-	//parsed_commands[x][y] -> token
-	//parsed_commands[x] -> array of tokens
-	parsed_commands[j] = malloc(sizeof(char*)*sizeof(char*));
-	for( i = 0 ; i < args ; i++ ){
-		if( strcmp(tokens[i],"|") == 0 ){
-			//fprintf(stdout,"FOUND PIPE\n");
-			parsed_commands[j][k] = NULL;
-			k=0;
-			j++;
-			parsed_commands[j] = malloc(sizeof(char*)*sizeof(char*));
-			continue;
-		} else {
-			//fprintf(stdout,"Token is: %s\n",tokens[i]);
-			parsed_commands[j][k] = malloc(sizeof(char*));
-			parsed_commands[j][k] = tokens[i];
-			k++;
-		}
-	}
-	parsed_commands[j+1] = NULL;
-}
 
 void parse_tokens2(char ** tokens, int args){
 	int i;
@@ -228,61 +135,21 @@ void parse_tokens2(char ** tokens, int args){
 	//fprintf(stdout,"PARSED COMMANDS\n");
 }
 
-void prepare_pipes(COMMAND ** commands){
-	int i;
-
-	fprintf(stdout,"PREPPING PIPES\n");
-	for( i = 0 ; commands[i] != NULL ; i++ ){
-		pipe(commands[i]->fd);
-		if( i == 0 && commands[i+1] == NULL ){ //Only command
-			//No need to set up pipes
-			fprintf(stdout,"NO SETUP\n");
-		} else if( i == 0 ){ /* Always source */
-			fprintf(stdout,"SETTING FIRST\n");
-			dup2(commands[i]->fd[1], 1);
-			close(commands[i]->fd[0]);
-			fprintf(stdout,"SET FIRST\n");
-		} else if( commands[i+1] == NULL ){ /* Always destination/output to stdout */
-			//Takes output from last command as input
-			fprintf(stdout,"SETTING LAST\n");
-			dup2(commands[i]->fd[0],commands[i-1]->fd[1]);
-			close(commands[i]->fd[1]);
-			fprintf(stdout,"SET LAST\n");
-		} else { //Anywhere in-between is always src&dest
-			fprintf(stdout,"SETTING INTERMEDIATE\n");
-			dup2(commands[i]->fd[0],commands[i-1]->fd[1]);
-			dup2(commands[i]->fd[1],1);
-			fprintf(stdout,"INTERMEDIATE SET\n");
-		}
-	}
-	fprintf(stdout,"PIPES PREPPED\n");
-}
-
-void close_pipes(COMMAND ** commands){
-	int i;
-	for( i = 0 ; commands[i] != NULL ; i++ ){
-		close(commands[i]->fd[0]);
-		close(commands[i]->fd[1]);
-	}
-}
-
-
-
 void execute_parsed2(COMMAND ** commands){
 	int i,status,pid;
-	int p[2];
+	int fd[2];
 	int fd_in = 0;
 
 	for( i = 0 ; commands[i] != NULL ; i++){
-		pipe(p);
+		pipe(fd);
 		if((pid = fork()) == -1){
 				exit(EXIT_FAILURE);
 		} else if (pid == 0){
 			dup2(fd_in, 0);
 			if(commands[i+1] != NULL){
-				dup2(p[1],1);
+				dup2(fd[1],1);
 			}
-			close(p[0]);
+			close(fd[0]);
 			if(commands[i]->argv[0][0] == '.' && commands[i]->argv[0][1] == '/'){
 				//Local exec
 				if(execv(commands[i]->argv[0],commands[i]->argv)!=0){
@@ -295,13 +162,8 @@ void execute_parsed2(COMMAND ** commands){
 			}
 			exit(EXIT_FAILURE);
 		} else {
-			//wait(NULL);
-			/*
-	    while (wait(&status) != pid);
-			fprintf(stdout,"\x1b[31mProcess %u exited with status: %d\x1b[0m\n",pid,status);
-			*/
-			close(p[1]);
-			fd_in = p[0];
+			close(fd[1]);
+			fd_in = fd[0];
 		}
 	}
 }
