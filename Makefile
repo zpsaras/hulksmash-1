@@ -8,4 +8,4 @@ run:
 	./shell
 
 clean:
-	rm -rf *.o shell
+	rm -rf *.o shell headertest
