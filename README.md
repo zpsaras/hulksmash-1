@@ -30,6 +30,16 @@ a few others like wait(NULL), (wait(&status) != pid), etc)
 Finally, newexec prints The process ID and exit status of every
 process caught.
 
+TESTING
+-------
+Tests were mostly done on a few nonsensical commands
+	(e.g.) ls / f | cat
+some 'real' ones
+	(e.g.) ls . | grep "shell"
+some silly ones
+	(e.g.) ls / | cat | grep bin
+And the entirety of the ones presented in your 'Testing Guidelines' page.
+
 CAVEATS
 -------
 
