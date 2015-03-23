@@ -43,7 +43,8 @@ int tokenize(char * string, int ln){
 		c = string[i];
 		if(state == OUT){
 			if((c == ' ') || (c == '\t') || (c == '\"') || 
-			   (c == '\'') || (c == '|') || (c == '\n')){
+			   (c == '\'') || (c == '|') || (c == '\n') ||
+			   (c == ';')){
 				if(k > 0){
 					add_tok();
 				}
@@ -125,11 +126,9 @@ int main()
 		tokens[args] = NULL;
 		
 		// print all args -- for testing
-		/*
 		for(i = 0 ; i < args ; ++i){
 			printf("token %d is '%s'.\n", i, tokens[i]);
 		}
-		*/
 		
 		parse_tokens2(tokens,args);
 		/*
