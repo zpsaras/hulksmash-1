@@ -29,6 +29,7 @@ int tokenize(char * string, int ln){
 
 	memset(tok_buff, '\0', INPUT_SIZE);
 	k = n = 0;
+	state = OUT;
 	for(i = 0 ; i < ln ; ++i){
 		c = string[i];
 		if(state == OUT){
