@@ -3,24 +3,31 @@
 #define INPUT_SIZE 2048
 #define ARG_SIZE 50
 #define NAME "-hulksmash-4.20$"
-#define QUIT "-q"
 #define DELIMS " \t|\"\0"
+#define QUOTE_ERROR "ERROR! Must have matching and closing quotes. Assuming missing quote is at end of input.\n"
 
 char * tokens[ARG_SIZE];
 char tok_buff[INPUT_SIZE];
 enum states {OUT, IN} state = OUT;
 int i, k, n;
 char * tok;
+char input[INPUT_SIZE];
 
 void add_tok(){
 	tok_buff[k] = '\0';
 	tok = malloc(k+1);
-	//memcpy(tok, tok_buff, k);
 	memcpy(tok, tok_buff, k+1);
 	tokens[n++] = tok;
 	memset(tok_buff, '\0', INPUT_SIZE);
 	k = 0;
 
+}
+
+void mismatched(char quote, int z){
+	printf(QUOTE_ERROR);
+	input[z] = quote;
+	printf("reading input as: %s\n", input);
+	add_tok();
 }
 
 int tokenize(char * string, int ln){
@@ -41,6 +48,9 @@ int tokenize(char * string, int ln){
 				if((c == '\"') || (c == '\'')){
 					last_quote = c;
 					state = IN;
+					if(i == ln -1){
+						mismatched(last_quote, ln);
+					}
 				}else if(c == '|'){
 					tok_buff[k++] = '|';
 					add_tok();	
@@ -61,15 +71,13 @@ int tokenize(char * string, int ln){
 				}else{
 					tok_buff[k++] = c;
 					if(i == ln - 1){
-						printf("ERROR! Must have closing quotes.\n");
-						return -1;
+						mismatched(last_quote, ln);
 					}
 				}
 			}else{
 				tok_buff[k++] = c;
 				if(i == ln - 1){
-					printf("ERROR! Must have closing quotations.\n");
-					return -1;
+					mismatched(last_quote, ln);
 				}
 			}
 		}
@@ -81,17 +89,12 @@ int tokenize(char * string, int ln){
 int main()
 {
 	int args, i, ln, j,k;	
-	char input[INPUT_SIZE];
 
 	//printf("%s ", NAME);
 	print_prompt(NAME);
 	while(fgets(input, INPUT_SIZE, stdin)){
 		ln = strlen(input) - 1;
 		if(input[ln] == '\n'){input[ln] = '\0';}
-		
-		if(strcmp(input, QUIT) == 0){
-			break;
-		}
 		
 		if((args = tokenize(input, ln)) == -1){
 			print_prompt(NAME);
@@ -100,12 +103,10 @@ int main()
 	
 		tokens[args] = NULL;
 		
-		/*
 		// print all args -- for testing
 		for(i = 0 ; i < args ; ++i){
 			printf("token %d is '%s'.\n", i, tokens[i]);
 		}
-		*/
 		
 		parse_tokens2(tokens,args);
 		/*
