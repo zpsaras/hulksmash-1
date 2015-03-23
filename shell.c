@@ -2,6 +2,7 @@
 
 #define INPUT_SIZE 1000000
 #define ARG_SIZE 2048
+#define MAX_ARGS 50
 #define NAME "-hulksmash-4.20$"
 #define DELIMS " \t|\"\0"
 #define QUOTE_ERROR "ERROR! Must have matching and closing quotes. Assuming missing quote is at end of input.\n"
@@ -97,6 +98,11 @@ int main()
 		if(input[ln] == '\n'){input[ln] = '\0';}
 		
 		if((args = tokenize(input, ln)) == -1){
+			print_prompt(NAME);
+			continue;
+		}
+		if(args > 50){
+			printf("ERROR! Must have maximum of 50 args\n");
 			print_prompt(NAME);
 			continue;
 		}
