@@ -30,6 +30,7 @@ int main(int argc, char ** argv){
 */
 	parse_tokens(myStrings,5);
 	parse_tokens(myStrings,5);
+	printf("test\n");
 	for( i = 0 ; parsed_commands[i] != NULL ; i++){
 		for( j = 0 ; parsed_commands[i][j] != NULL ; j++){
 			fprintf(stdout,"%s ",parsed_commands[i][j]);
