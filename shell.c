@@ -100,13 +100,15 @@ int main()
 	
 		tokens[args] = NULL;
 		
+		/*
 		// print all args -- for testing
 		for(i = 0 ; i < args ; ++i){
 			printf("token %d is '%s'.\n", i, tokens[i]);
 		}
+		*/
 		
-		fprintf(stderr,"#Args: %d\n",args);
 		parse_tokens(tokens,args);
+		/*
 		fprintf(stderr,"%s\n",parsed_commands[0][2]);
 		for( j = 0 ; parsed_commands[j] != NULL ; j++){
 			fprintf(stderr,"Eh?\n");
@@ -115,6 +117,7 @@ int main()
 			}
 			fprintf(stdout,"\n");
 		}
+		*/
 
 		//Sorry for the lack of inspiration PK ;]
 		if(tokens[0] == NULL){
