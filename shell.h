@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <errno.h>
 #include <unistd.h>
+#include <limits.h>
 
 #define MAX_BUFFER 4096
 #define COMMAND_ARRAY_SIZE 1024 
@@ -266,6 +267,7 @@ void close_pipes(COMMAND ** commands){
 }
 
 
+
 void execute_parsed2(COMMAND ** commands){
 	int i,status,pid;
 	int p[2];
@@ -293,9 +295,20 @@ void execute_parsed2(COMMAND ** commands){
 			}
 			exit(EXIT_FAILURE);
 		} else {
-			wait(NULL);
+			//wait(NULL);
+			/*
+	    while (wait(&status) != pid);
+			fprintf(stdout,"\x1b[31mProcess %u exited with status: %d\x1b[0m\n",pid,status);
+			*/
 			close(p[1]);
 			fd_in = p[0];
 		}
 	}
+}
+
+void newexec(COMMAND ** commands){
+	int pid,status;
+	execute_parsed2(commands);
+	while ((pid = wait(&status)) != -1)	/* pick up all the dead children */
+				fprintf(stderr, "\x1b[31mProcess %u exited with status: %d\x1b[0m\n", pid, WEXITSTATUS(status));
 }

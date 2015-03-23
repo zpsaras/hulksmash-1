@@ -1,7 +1,7 @@
 #include "shell.h"
 
-#define INPUT_SIZE 2048
-#define ARG_SIZE 50
+#define INPUT_SIZE 1000000
+#define ARG_SIZE 2048
 #define NAME "-hulksmash-4.20$"
 #define QUIT "-q"
 #define DELIMS " \t|\"\0"
@@ -132,7 +132,7 @@ int main()
 		} else if(strcmp(tokens[0],"exit") == 0) {
 			((_EXIT)funcs[1])(0);
 		} else {
-			execute_parsed2(parsed_commands2);
+			newexec(parsed_commands2);
 		}
 
 
