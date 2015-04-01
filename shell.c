@@ -9,7 +9,7 @@
 
 char * tokens[ARG_SIZE];
 char tok_buff[INPUT_SIZE];
-enum states {OUT, IN, WORD} state = OUT;
+enum states {OUT, IN, QUOTE} state = OUT;
 int i, k, n;
 char * tok;
 
@@ -86,22 +86,97 @@ int tokenize2(char * string, int ln){
 	return n;
 }
 
-int advance(){
+int advance(char * string, int start, int end){
+	char c;
+	int i;
+	
+	c = string[start+1];
+	string[start+1] = string[start];
+	string[start] = '\0';
 
+	for(i = start+1 ; i < end ; ++i){
+		c = string[i+1];
+		string[i+1] = string[i];
+	}
+}
+
+void reset_in(char * string){
+	int i;
+	for(i = 0 ; i < INPUT_SIZE ; ++i){
+		string[i] = '\0';
+	} 
+}
+
+void test_print(char * string, int ln){
+	int i;
+	for(i = 0 ; i < ln ; ++i){
+		if(string[i] == '\0'){
+			printf("\n");
+		}else{
+			printf("%c", string[i]);
+		}
+	}
+	printf("\n");
+	return;
 }
 
 int tokenize(char * string, int ln){
-	int i, args;
-	state = WORD;
+	int i, args, pos;
+	char last;
 	
-	args = 0;
+	state = OUT;
+	args = pos = 0;
 	for(i = 0 ; i < ln ; ++i){
-		switch(string[i]){
-			case ' ':	break;
-			case '|':	break;
-			default :	break;
+		if(state == IN){
+			if(string[i] == ' '){
+				string[i] = '\0';
+				tokens[args] = string + pos;
+				state = OUT;
+				args++;
+			}else if(string[i] == '|'){
+	
+			}else if(string[i] == '\"' || string[i] == '\''){
+	
+			}else{
+				if(i == ln - 1){
+					tokens[args] = string + pos;
+					state = OUT;
+					string[i+1] = '\0';
+					args++;
+				}
+			}
+		}else if(state == OUT){
+			if(string[i] == ' '){
+				string[i] = '\0';	
+			}else if(string[i] == '|'){
+	
+			}else if(string[i] == '\"' || string[i] == '\''){
+				last = string[i];
+				i++;
+				pos = i;
+				state = QUOTE;
+			}else{
+				pos = i;
+				state = IN;
+			}
+
+		}else if(state == QUOTE){
+			if(string[i] == last){
+				if(string[i+1] == ' '){
+					string[i+1] = '\0';
+				}
+				string[i] = '\0';
+				tokens[args] = string + pos;
+				state = OUT;
+				args++;
+			}else{
+				if(i == ln - 1){
+					// quotes not finished
+				}
+			}
 		}
 	}
+	return args;
 }
 
 
@@ -132,13 +207,16 @@ int main()
 			print_prompt(NAME);
 			continue;
 		}
+		//test_print(input, ln);
 		if(args > 50){
 			printf("ERROR! Must have maximum of 50 args\n");
 			print_prompt(NAME);
 			continue;
 		}
+		for(i = 0 ; i < args ; ++i){
+			printf("token %d: %s\n", i, tokens[i]);
+		}
 		
-		/*
 		tokens[args] = NULL;	
 
 		parse_tokens2(tokens,args);
@@ -163,9 +241,9 @@ int main()
 		} else {
 			newexec(parsed_commands2);
 		}
-
+		
 		print_prompt(NAME);
+		reset_in(input);
 	}
-	*/
 	return 0;
 }
