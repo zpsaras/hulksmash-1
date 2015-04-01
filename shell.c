@@ -9,7 +9,7 @@
 
 char * tokens[ARG_SIZE];
 char tok_buff[INPUT_SIZE];
-enum states {OUT, IN} state = OUT;
+enum states {OUT, IN, WORD} state = OUT;
 int i, k, n;
 char * tok;
 
@@ -30,7 +30,7 @@ void mismatched(char * string, char quote, int z){
 	add_tok();
 }
 
-int tokenize(char * string, int ln){
+int tokenize2(char * string, int ln){
 
 	char c, last_quote;
 
@@ -86,9 +86,28 @@ int tokenize(char * string, int ln){
 	return n;
 }
 
+int advance(){
+
+}
+
+int tokenize(char * string, int ln){
+	int i, args;
+	state = WORD;
+	
+	args = 0;
+	for(i = 0 ; i < ln ; ++i){
+		switch(string[i]){
+			case ' ':	break;
+			case '|':	break;
+			default :	break;
+		}
+	}
+}
+
+
 int main()
 {
-	int args, i, ln, j,k;	
+	int args, i, ln, j, k;	
 	char input[INPUT_SIZE];
 	
 	if(!isatty(fileno(stdin))){
@@ -118,7 +137,8 @@ int main()
 			print_prompt(NAME);
 			continue;
 		}
-	
+		
+		/*
 		tokens[args] = NULL;	
 
 		parse_tokens2(tokens,args);
@@ -146,5 +166,6 @@ int main()
 
 		print_prompt(NAME);
 	}
+	*/
 	return 0;
 }
