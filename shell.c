@@ -14,7 +14,7 @@ int i, k, n;
 char * tok;
 
 // advances from start to end. returns new length
-int advance(char * string, int start, int end){
+/*int advance(char * string, int start, int end){
 	char c;
 	int i;
 	
@@ -24,7 +24,7 @@ int advance(char * string, int start, int end){
 	}
 	string[start] = '\0';
 	return end+1;
-}
+}*/
 
 void reset_in(char * string){
 	int i;
@@ -44,13 +44,17 @@ int tokenize(char * string, int ln){
 			if(string[i] == ' ' || string[i] == '\0'){
 				string[i] = '\0';
 				tokens[args] = string + pos;
-				state = OUT;
 				args++;
+				state = OUT;
 			}else if(string[i] == '|'){
 				ln = advance(string, i, ln-1);	
 				tokens[args] = string + pos;
 				args++;
-				ln = advance(string, i+2, ln-1);
+				if(string[i+2] != ' ' && string[i+2] != '\0'){
+					ln = advance(string, i+2, ln-1);
+				}else{
+					string[i+2] = '\0';
+				}
 				pos = i+1;
 				tokens[args] = string + pos;
 				args++;
@@ -58,7 +62,6 @@ int tokenize(char * string, int ln){
 				i += 2;
 			}else if(string[i] == '\"' || string[i] == '\''){
 				last = string[i];
-				//ln = advance(string, i, ln-1);
 				string[i] = '\0';
 				i++;
 				tokens[args] = string + pos;
@@ -68,17 +71,21 @@ int tokenize(char * string, int ln){
 			}else{
 				if(i == ln - 1){
 					tokens[args] = string + pos;
+					args++;
 					state = OUT;
 					string[i+1] = '\0';
-					args++;
 				}
 			}
 		}else if(state == OUT){
-			if(string[i] == ' '){
+			if(string[i] == ' ' || string[i] == '\0'){
 				string[i] = '\0';	
 			}else if(string[i] == '|'){
 				pos = i;
-				ln = advance(string, i+1, ln-1);
+				if(string[i+1] != ' ' && string[i+1] != '\0'){
+					ln = advance(string, i+1, ln-1);
+				}else{
+					string[i+1] = '\0';
+				}
 				tokens[args] = string + pos;
 				args++;
 				i++;
@@ -89,6 +96,11 @@ int tokenize(char * string, int ln){
 				state = QUOTE;
 			}else{
 				pos = i;
+				if(i == ln - 1){
+					string[ln] = '\0';
+					tokens[args] = string + pos;
+					args++;
+				}
 				state = IN;
 			}
 
@@ -105,8 +117,9 @@ int tokenize(char * string, int ln){
 			}else{
 				if(i == ln - 1){
 					printf("ERROR: unclosed quotes. automatically adding to end\n");
-					string[ln] = last;
-					ln++;
+					string[ln] = '\0';
+					tokens[args] = string + pos;
+					args++;
 				}
 			}
 		}

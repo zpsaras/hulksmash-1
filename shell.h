@@ -26,6 +26,18 @@ void print_prompt(char * name){
 	getcwd(buffer,MAX_BUFFER);
 	fprintf(stdout,"%s:%s$ ",name,buffer);
 }
+// advances chars in string by 1 from start to end
+int advance(char * string, int start, int end){
+	char c;
+	int i;
+	
+	string[end+2] = '\0';
+	for(i = end ; i >= start ; i--){
+		string[i+1] = string[i];
+	}
+	string[start] = '\0';
+	return end+1;
+}
 
 /* V2.0 of tokens[] parser */
 void parse_tokens2(char ** tokens, int args){
