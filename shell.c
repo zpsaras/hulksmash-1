@@ -47,24 +47,24 @@ int tokenize(char * string, int ln){
 				state = OUT;
 				args++;
 			}else if(string[i] == '|'){
-				ln = advance(string, i, ln-1);
-				
+				ln = advance(string, i, ln-1);	
 				tokens[args] = string + pos;
 				args++;
-				
 				ln = advance(string, i+2, ln-1);
-				
 				pos = i+1;
 				tokens[args] = string + pos;
 				args++;
-				
 				state = OUT;
 				i += 2;
 			}else if(string[i] == '\"' || string[i] == '\''){
-				ln = advance(string, i, ln-1);
+				last = string[i];
+				//ln = advance(string, i, ln-1);
+				string[i] = '\0';
 				i++;
 				tokens[args] = string + pos;
+				args++;
 				state = QUOTE;
+				pos = i;
 			}else{
 				if(i == ln - 1){
 					tokens[args] = string + pos;
@@ -77,15 +77,11 @@ int tokenize(char * string, int ln){
 			if(string[i] == ' '){
 				string[i] = '\0';	
 			}else if(string[i] == '|'){
-				ln = advance(string, i, ln-1);
-				pos = i+1;
-
-				ln = advance(string, i+2, ln-1);
-
-				tokens[args] = string+pos;
+				pos = i;
+				ln = advance(string, i+1, ln-1);
+				tokens[args] = string + pos;
 				args++;
-				i += 2;
-				
+				i++;
 			}else if(string[i] == '\"' || string[i] == '\''){
 				last = string[i];
 				i++;
@@ -105,6 +101,7 @@ int tokenize(char * string, int ln){
 				tokens[args] = string + pos;
 				state = OUT;
 				args++;
+				i++;
 			}else{
 				if(i == ln - 1){
 					printf("ERROR: unclosed quotes. automatically adding to end\n");
