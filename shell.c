@@ -13,91 +13,17 @@ enum states {OUT, IN, QUOTE} state = OUT;
 int i, k, n;
 char * tok;
 
-void add_tok(){
-	tok_buff[k] = '\0';
-	tok = malloc(k+1);
-	memcpy(tok, tok_buff, k+1);
-	tokens[n++] = tok;
-	memset(tok_buff, '\0', INPUT_SIZE);
-	k = 0;
-
-}
-
-void mismatched(char * string, char quote, int z){
-	printf(QUOTE_ERROR);
-	string[z] = quote;
-	printf("reading input as: %s\n", string);
-	add_tok();
-}
-
-int tokenize2(char * string, int ln){
-
-	char c, last_quote;
-
-	memset(tok_buff, '\0', INPUT_SIZE);
-	k = n = 0;
-	state = OUT;
-	for(i = 0 ; i < ln ; ++i){
-		c = string[i];
-		if(state == OUT){
-			if((c == ' ') || (c == '\t') || (c == '\"') || 
-			   (c == '\'') || (c == '|') || (c == '\n')){
-				if(k > 0){
-					add_tok();
-				}
-				if((c == '\"') || (c == '\'')){
-					last_quote = c;
-					state = IN;
-					if(i == ln -1){
-						mismatched(string, last_quote, ln);
-					}
-				}else if(c == '|'){
-					tok_buff[k++] = '|';
-					add_tok();	
-				}
-			}else{	
-				tok_buff[k++] = c;
-				if(i == ln - 1){
-					add_tok();
-				}
-			}
-		}else if(state == IN){
-			if((c == '\"') || (c == '\'')){
-				if(c == last_quote){
-					if(k > 0){
-						add_tok();
-					}
-					state = OUT;
-				}else{
-					tok_buff[k++] = c;
-					if(i == ln - 1){
-						mismatched(string, last_quote, ln);
-					}
-				}
-			}else{
-				tok_buff[k++] = c;
-				if(i == ln - 1){
-					mismatched(string, last_quote, ln);
-				}
-			}
-		}
-	}
-
-	return n;
-}
-
+// advances from start to end. returns new length
 int advance(char * string, int start, int end){
 	char c;
 	int i;
 	
-	c = string[start+1];
-	string[start+1] = string[start];
-	string[start] = '\0';
-
-	for(i = start+1 ; i < end ; ++i){
-		c = string[i+1];
+	string[end+2] = '\0';
+	for(i = end ; i >= start ; i--){
 		string[i+1] = string[i];
 	}
+	string[start] = '\0';
+	return end+1;
 }
 
 void reset_in(char * string){
@@ -105,19 +31,6 @@ void reset_in(char * string){
 	for(i = 0 ; i < INPUT_SIZE ; ++i){
 		string[i] = '\0';
 	} 
-}
-
-void test_print(char * string, int ln){
-	int i;
-	for(i = 0 ; i < ln ; ++i){
-		if(string[i] == '\0'){
-			printf("\n");
-		}else{
-			printf("%c", string[i]);
-		}
-	}
-	printf("\n");
-	return;
 }
 
 int tokenize(char * string, int ln){
@@ -128,15 +41,30 @@ int tokenize(char * string, int ln){
 	args = pos = 0;
 	for(i = 0 ; i < ln ; ++i){
 		if(state == IN){
-			if(string[i] == ' '){
+			if(string[i] == ' ' || string[i] == '\0'){
 				string[i] = '\0';
 				tokens[args] = string + pos;
 				state = OUT;
 				args++;
 			}else if(string[i] == '|'){
-	
+				ln = advance(string, i, ln-1);
+				
+				tokens[args] = string + pos;
+				args++;
+				
+				ln = advance(string, i+2, ln-1);
+				
+				pos = i+1;
+				tokens[args] = string + pos;
+				args++;
+				
+				state = OUT;
+				i += 2;
 			}else if(string[i] == '\"' || string[i] == '\''){
-	
+				ln = advance(string, i, ln-1);
+				i++;
+				tokens[args] = string + pos;
+				state = QUOTE;
 			}else{
 				if(i == ln - 1){
 					tokens[args] = string + pos;
@@ -149,7 +77,15 @@ int tokenize(char * string, int ln){
 			if(string[i] == ' '){
 				string[i] = '\0';	
 			}else if(string[i] == '|'){
-	
+				ln = advance(string, i, ln-1);
+				pos = i+1;
+
+				ln = advance(string, i+2, ln-1);
+
+				tokens[args] = string+pos;
+				args++;
+				i += 2;
+				
 			}else if(string[i] == '\"' || string[i] == '\''){
 				last = string[i];
 				i++;
@@ -171,7 +107,9 @@ int tokenize(char * string, int ln){
 				args++;
 			}else{
 				if(i == ln - 1){
-					// quotes not finished
+					printf("ERROR: unclosed quotes. automatically adding to end\n");
+					string[ln] = last;
+					ln++;
 				}
 			}
 		}
