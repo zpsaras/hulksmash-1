@@ -6,11 +6,11 @@ Nicholas Bene | Tom Milburn | Zach Psaras
 TOKENIZER
 ---------
 
-Tokenizes by white space. Additional tokens are as follows: ' ', '\t', double-quote, single-quote, '|' and '\n'.   
-Anything within matching single, or double quotes, is exactly one token.  
-A single quote inside double quotes will be part of the token (and vice versa).
-A pipe is a delimiter and its own token, unless it is in quotes.
-If a quote is missing, the matching quote will be added at the end of the input string.
++ Tokenizes by white space. Additional tokens are as follows: ' ', '\t', double-quote, single-quote, '|' and '\n'.   
++ Anything within matching single, or double quotes, is exactly one token.  
++ A single quote inside double quotes will be part of the token (and vice versa).
++ A pipe is a delimiter and its own token, unless it is in quotes.
++ If a quote is missing, the matching quote will be added at the end of the input string.
 
 FROM TOKENS ONWARDS
 -------------------
