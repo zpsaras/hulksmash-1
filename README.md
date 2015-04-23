@@ -3,6 +3,9 @@ simple shell for OS
 
 Nicholas Bene | Tom Milburn | Zach Psaras
 
+FORK NOTES: This is mainly a toy to play around and experiment with shell design.
+A few things have been changed, namely things relating to memory usage and changing fgets() to readline()
+
 TOKENIZER
 ---------
 
